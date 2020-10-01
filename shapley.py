@@ -17,7 +17,7 @@ from itertools import product
 
 import numpy as np
 
-from alignment import compute_alignment, length
+from alignment import compute_alignment, length, paths
 from optimiser import params_fixed, segments
 from tax_model import Society
 
@@ -96,26 +96,31 @@ def shapley_value(model_cls, individual_norm, baseline_parameters, optimal_param
 
 if __name__ == '__main__':
   # baseline model: check that it leaves the society unchanged
-  baseline_model = Society(**baseline_params)
-  initial_global_state = [(a.wealth, a.position) for a in baseline_model.agents]
-  for _ in range(length):
-    baseline_model.step()
-  final_global_state = [(a.wealth, a.position) for a in baseline_model.agents]
-  has_baseline_evolved = not initial_global_state == final_global_state
+  baseline_evolution = []
+  for _ in range(paths):
+    baseline_model = Society(**baseline_params)
+    initial_global_state = [(a.wealth, a.position) for a in baseline_model.agents]
+    for _ in range(length):
+      baseline_model.step()
+    final_global_state = [(a.wealth, a.position) for a in baseline_model.agents]
+    has_baseline_evolved = not initial_global_state == final_global_state
+    baseline_evolution.append(has_baseline_evolved)
+  has_baseline_evolved = bool(sum(baseline_evolution))
+  print("Is the baseline normative system causing model evolution? {}".format(has_baseline_evolved))
   
-  values = ['equality', 'fairness', 'aggregation']
+  # values = ['equality', 'fairness', 'aggregation']
 
-  # compute and save shapley values
-  for v in values:
-    filename = "optimal_models/solution_" + v + ".model"
-    with open(filename, "rb") as file:
-      model = pickle.load(file)
-    optimal_params = get_society_params(model)
-    shapley_values = {}
+  # # compute and save shapley values
+  # for v in values:
+  #   filename = "optimal_models/solution_" + v + ".model"
+  #   with open(filename, "rb") as file:
+  #     model = pickle.load(file)
+  #   optimal_params = get_society_params(model)
+  #   shapley_values = {}
     
-    for norm in coalition:
-      shapley_values[norm] = shapley_value(Society, norm, baseline_params,
-                                            optimal_params, coalition, v)
+  #   for norm in coalition:
+  #     shapley_values[norm] = shapley_value(Society, norm, baseline_params,
+  #                                           optimal_params, coalition, v)
 
-    with open('shapley_values_{}.json'.format(v), 'w') as file:
-      json.dump(shapley_values, file)
+  #   with open('shapley_values_{}.json'.format(v), 'w') as file:
+  #     json.dump(shapley_values, file)
