@@ -17,7 +17,7 @@ from itertools import product
 
 import numpy as np
 
-from alignment import compute_alignment
+from alignment import compute_alignment, length
 from optimiser import params_fixed, segments
 from tax_model import Society
 
@@ -26,7 +26,7 @@ from tax_model import Society
 baseline_params = {'num_agents': params_fixed['num_agents'],
                    'num_evaders': params_fixed['num_evaders'],
                    'collecting_rates': [0. for _ in range(segments)],
-                   'redistribution_rates': [1 / segments for _ in range(segments)],
+                   'redistribution_rates': [1/segments for _ in range(segments)],
                    'invest_rate': params_fixed['invest_rate'],
                    'catch': 0.,
                    'fine_rate': 0.}
@@ -95,14 +95,13 @@ def shapley_value(model_cls, individual_norm, baseline_parameters, optimal_param
 
 
 if __name__ == '__main__':
-  # baseline model
+  # baseline model: check that it leaves the society unchanged
   baseline_model = Society(**baseline_params)
-  baseline_algn_equality = compute_alignment(baseline_model, 'equality')
-  baseline_algn_fairness = compute_alignment(baseline_model, 'fairness')
-  baseline_algn_aggregation = compute_alignment(baseline_model, 'aggregation')
-  print("Baseline alignment with respect to equality: {:.4f}".format(baseline_algn_equality))
-  print("Baseline alignment with respect to justice: {:.4f}".format(baseline_algn_fairness))
-  print("Baseline alignment with respect to aggregated values: {:.4f}".format(baseline_algn_aggregation))
+  initial_global_state = [(a.wealth, a.position) for a in baseline_model.agents]
+  for _ in range(length):
+    baseline_model.step()
+  final_global_state = [(a.wealth, a.position) for a in baseline_model.agents]
+  has_baseline_evolved = not initial_global_state == final_global_state
   
   values = ['equality', 'fairness', 'aggregation']
 
@@ -116,7 +115,7 @@ if __name__ == '__main__':
     
     for norm in coalition:
       shapley_values[norm] = shapley_value(Society, norm, baseline_params,
-                                           optimal_params, coalition, v)
+                                            optimal_params, coalition, v)
 
     with open('shapley_values_{}.json'.format(v), 'w') as file:
       json.dump(shapley_values, file)
