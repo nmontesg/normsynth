@@ -37,12 +37,11 @@ class GeneticOptimizer:
     to perform before halting. Default 500.
     - max_partial_iter: maximum number of iterations to perform in the genetic
     search without an update on the candidate solution before halting. Default 20.
-    -
   """
 
   def __init__(self, model_cls, params_optimize, params_fixed, value,
-              pop_size=50, p=0.25, keep_best=5, max_total_iter=500,
-              max_partial_iter=20, fitness_threshold=0.9):
+              pop_size=100, p=0.25, keep_best=5, max_total_iter=500,
+              max_partial_iter=50, fitness_threshold=0.90):
     self.model_cls = model_cls
     self.params_optimize = params_optimize
     self.params_fixed = params_fixed
@@ -173,6 +172,11 @@ class GeneticOptimizer:
     print("Fittest model: {:.4f}\n".format(fittest_so_far.fitness))
     if fittest_so_far.fitness > self.fitness_threshold:
       return fittest_so_far
+    
+    # save fittest so far
+    filename = "solution_" + self.value + ".model"
+    with open(filename, "wb") as file:
+      pickle.dump(fittest_so_far, file)
 
     # GENETIC SEARCH LOOP
     partial_iter = 0
@@ -204,6 +208,8 @@ class GeneticOptimizer:
       fittest_in_population = self.find_fittest()
       if fittest_in_population.fitness > fittest_so_far.fitness:
         fittest_so_far = copy.deepcopy(fittest_in_population)
+        with open(filename, "wb") as file:
+            pickle.dump(fittest_so_far, file)
         partial_iter = 0
 
       # check termination conditions
@@ -242,21 +248,15 @@ params_fixed = {
 }
 
 if __name__ == '__main__':
+
+  v = 'equality'
   
-
-  values = ['equality', 'fairness', 'aggregation']
-
-  for v in values:
-    print("*** Optimization with respect to value {} ***\n".format(v.upper()))
-    optimizer = GeneticOptimizer(
-      model_cls=Society,
-      params_optimize=params_optimize,
-      params_fixed=params_fixed,
-      value=v
-    )
-    
-    optimal_model = optimizer.genetic_search()
-    
-    filename = "solution_" + v + ".model"
-    with open(filename, "rb") as file:
-      pickle.dump(optimal_model, file)
+  print("*** Optimization with respect to value {} ***\n".format(v.upper()))
+  optimizer = GeneticOptimizer(
+    model_cls=Society,
+    params_optimize=params_optimize,
+    params_fixed=params_fixed,
+    value=v
+  )
+  
+  optimal_model = optimizer.genetic_search()

@@ -38,21 +38,24 @@ class Individual:
     """
     Individual contributes to common fund according to his/her tax rate.
     """
+    payment = 0.
     # law-abiding agents
     if not self.is_evader:
-      tax = self.wealth * self.model.collecting_rates[self.segment]
-      self.wealth -= tax
-      self.model.common_fund += tax
+      payment = self.wealth * self.model.collecting_rates[self.segment]
+      self.wealth -= payment
+      self.model.common_fund += payment
     # evader agents:
     else:
       if np.random.uniform(0, 1) < self.model.catch:
-        fine = self.wealth * self.model.collecting_rates[self.segment] * (1 + self.model.fine_rate)
-        if fine >= self.wealth:
-          self.model.common_fund += self.wealth
+        payment = self.wealth * self.model.collecting_rates[self.segment] * (1 + self.model.fine_rate)
+        if payment >= self.wealth:
+          payment = self.wealth
+          self.model.common_fund += payment
           self.wealth = 0
         else:
-          self.wealth -= fine
-          self.model.common_fund += fine
+          self.wealth -= payment
+          self.model.common_fund += payment
+    self.payment = payment
           
 
 class Society:
@@ -89,6 +92,8 @@ class Society:
 
     # assign agents to their wealth group
     self.assign_agents_to_segments()
+    
+    self.time_step = 0
 
   def assign_agents_to_segments(self):
     """
@@ -98,7 +103,7 @@ class Society:
     sorted_agents = sorted(self.agents, key=lambda a: a.wealth)
     # assign agents to their position in ranking
     for i in range(len(sorted_agents)):
-      setattr(sorted_agents[i], 'position', self.num_agents - i - 1)
+      setattr(sorted_agents[i], 'position', self.num_agents-i)
     # assign agents to their segment
     cut_index = int(self.num_agents / self.num_segments)
     for n in range(self.num_segments):
@@ -116,10 +121,14 @@ class Society:
     self.common_fund = 0.
     # collect taxes from all agents
     for ind in self.agents:
-      ind.step()
+      _ = ind.step()
     # redistribute common fund
     for ind in self.agents:
-      ind.wealth += self.common_fund * (1 + self.invest_rate) * self.redistribution_rates[
+      payback = self.common_fund * (1 + self.invest_rate) * self.redistribution_rates[
         ind.segment] * self.num_segments / self.num_agents
+      ind.wealth += payback
+      ind.payback = payback
     # recompute segments
     self.assign_agents_to_segments()
+    self.time_step += 1
+  

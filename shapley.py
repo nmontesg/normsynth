@@ -108,19 +108,24 @@ if __name__ == '__main__':
   has_baseline_evolved = bool(sum(baseline_evolution))
   print("Is the baseline normative system causing model evolution? {}".format(has_baseline_evolved))
   
-  values = ['equality', 'fairness', 'aggregation']
-
   # compute and save shapley values
-  for v in values:
-    filename = "optimal_models/solution_" + v + ".model"
-    with open(filename, "rb") as file:
-      model = pickle.load(file)
-    optimal_params = get_society_params(model)
-    shapley_values = {}
-    
-    for norm in coalition:
-      shapley_values[norm] = shapley_value(Society, norm, baseline_params,
-                                            optimal_params, coalition, v)
+  values = ['equality', 'fairness', 'aggregation']
+  v = values[0]
+  
+  filename = "optimal_models/solution_" + v + ".model"
+  with open(filename, "rb") as file:
+    model = pickle.load(file)
+  optimal_params = get_society_params(model)
+  shapley_values = {}
+  
+  for norm in coalition:
+    shapley_values[norm] = shapley_value(Society, norm, baseline_params,
+                                          optimal_params, coalition, v)
 
-    with open('shapley_values_{}.json'.format(v), 'w') as file:
-      json.dump(shapley_values, file)
+  with open('shapley_values_{}.json'.format(v), 'w') as file:
+    json.dump(shapley_values, file)
+    
+  print("Shapley values for the optimal model with respect to {}".format(v.upper()))
+  for norm in coalition:
+    print("\t{}: {:.2f}".format(norm, shapley_values[norm]))
+  print("\n")
