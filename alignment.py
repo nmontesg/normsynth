@@ -24,9 +24,9 @@ def equality_single_path(model):
   for _ in range(length):
     model.step()
   agent_wealths = [agent.wealth for agent in model.agents]
-  numerator = sum([sum([abs(x_i - x_j) for x_j in agent_wealths])
+  numerator = sum([sum([abs(x_i-x_j) for x_j in agent_wealths])
                   for x_i in agent_wealths])
-  gini_index = numerator / (2 * model.num_agents ** 2 * np.mean(agent_wealths))
+  gini_index = numerator / (2 * model.num_agents**2 * np.mean(agent_wealths))
   return (1 - 2*gini_index)
 
 
@@ -44,8 +44,8 @@ def fairness_single_path(model):
 
 def compute_alignment(model, value):
   """
-  Compute the alignment by sampling over many paths, use the alignment function
-  for the input value.
+  Compute the alignment by sampling over many paths, use the alignment
+  function for the input value.
   """
   model_params = {
     'num_agents': model.num_agents,

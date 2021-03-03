@@ -28,7 +28,8 @@ class GeneticOptimizer:
     with format {key: allowed interval}.
     - params_fixed: a dictionary of the model parameters that stay fixed
     throughout the search. It has the format: {key: fixed value}.
-    - value: target value. Options are 'equality', 'fairness' and 'aggregation'.
+    - value: target value. Options are 'equality', 'fairness' and
+    'aggregation'.
     - pop_size: population size for the genetic search. Default 50.
     - p: p parameter for intermediate recombination. Default 0.25.
     - keep_best: from one iteration of the genetic search to the next, keep
@@ -36,7 +37,8 @@ class GeneticOptimizer:
     - max_total_iter: maximum number of total iteration of the genetic search
     to perform before halting. Default 500.
     - max_partial_iter: maximum number of iterations to perform in the genetic
-    search without an update on the candidate solution before halting. Default 20.
+    search without an update on the candidate solution before halting.
+    Default 20.
   """
 
   def __init__(self, model_cls, params_optimize, params_fixed, value,
@@ -62,13 +64,16 @@ class GeneticOptimizer:
     for key, interval in self.params_optimize.items():
       # for optimizable parameters that are single values
       if not isinstance(interval, list):
-        init_params[key] = np.random.uniform(low=interval.lower, high=interval.upper)
+        init_params[key] = np.random.uniform(low=interval.lower,
+                                             high=interval.upper)
       # for optimizable parameters that are actually lists
       else:
-        init_params[key] = [np.random.uniform(low=i.lower, high=i.upper) for i in interval]
+        init_params[key] = [np.random.uniform(low=i.lower, high=i.upper)
+                            for i in interval]
       # for redistribution_rates: normalize to respect constraint
       if key == 'redistribution_rates':
-        init_params[key] = [i / sum(init_params[key]) for i in init_params[key]]
+        init_params[key] = [i / sum(init_params[key])
+                            for i in init_params[key]]
     model = self.model_cls(**init_params)
     model.fitness = compute_alignment(model, self.value)
     return model
@@ -78,7 +83,8 @@ class GeneticOptimizer:
     """
     Build an initial random population.
     """
-    self.population = [self.make_random_candidate() for _ in range(self.pop_size)]
+    self.population = [self.make_random_candidate()
+                       for _ in range(self.pop_size)]
 
 
   def tournament_selection(self):
@@ -124,13 +130,18 @@ class GeneticOptimizer:
       if not isinstance(interval, list):
         alpha = np.random.uniform(-self.p, 1 + self.p)
         beta = np.random.uniform(-self.p, 1 + self.p)
-        child1_params[key] = alpha * getattr(parent1, key) + (1 - alpha) * getattr(parent2, key)
-        child2_params[key] = beta * getattr(parent1, key) + (1 - beta) * getattr(parent2, key)
-        while (child1_params[key] not in interval) or (child2_params[key] not in interval):
+        child1_params[key] = alpha * getattr(parent1, key) + \
+          (1 - alpha) * getattr(parent2, key)
+        child2_params[key] = beta * getattr(parent1, key) + \
+          (1 - beta) * getattr(parent2, key)
+        while (child1_params[key] not in interval) or \
+          (child2_params[key] not in interval):
           alpha = np.random.uniform(-self.p, 1 + self.p)
           beta = np.random.uniform(-self.p, 1 + self.p)
-          child1_params[key] = alpha * getattr(parent1, key) + (1 - alpha) * getattr(parent2, key)
-          child2_params[key] = beta * getattr(parent1, key) + (1 - beta) * getattr(parent2, key)
+          child1_params[key] = alpha * getattr(parent1, key) + \
+            (1 - alpha) * getattr(parent2, key)
+          child2_params[key] = beta * getattr(parent1, key) + \
+            (1 - beta) * getattr(parent2, key)
 
       # for parameters that are lists
       else:
@@ -139,18 +150,25 @@ class GeneticOptimizer:
         for i in range(parent1.num_segments):
           alpha = np.random.uniform(-self.p, 1 + self.p)
           beta = np.random.uniform(-self.p, 1 + self.p)
-          child1_params[key].append(alpha * getattr(parent1, key)[i] + (1 - alpha) * getattr(parent2, key)[i])
-          child2_params[key].append(beta * getattr(parent1, key)[i] + (1 - beta) * getattr(parent2, key)[i])
-          while (child1_params[key][-1] not in interval[i]) or (child2_params[key][-1] not in interval[i]):
+          child1_params[key].append(alpha * getattr(parent1, key)[i] + \
+                                    (1 - alpha) * getattr(parent2, key)[i])
+          child2_params[key].append(beta * getattr(parent1, key)[i] + \
+                                    (1 - beta) * getattr(parent2, key)[i])
+          while (child1_params[key][-1] not in interval[i]) or \
+            (child2_params[key][-1] not in interval[i]):
             alpha = np.random.uniform(-self.p, 1 + self.p)
             beta = np.random.uniform(-self.p, 1 + self.p)
-            child1_params[key][-1] = alpha * getattr(parent1, key)[i] + (1 - alpha) * getattr(parent2, key)[i]
-            child2_params[key][-1] = beta * getattr(parent1, key)[i] + (1 - beta) * getattr(parent2, key)[i]
+            child1_params[key][-1] = alpha * getattr(parent1, key)[i] + \
+              (1 - alpha) * getattr(parent2, key)[i]
+            child2_params[key][-1] = beta * getattr(parent1, key)[i] + \
+              (1 - beta) * getattr(parent2, key)[i]
 
       # normalize redistribution rates
       if key == 'redistribution_rates':
-        child1_params[key] = [i / sum(child1_params[key]) for i in child1_params[key]]
-        child2_params[key] = [i / sum(child2_params[key]) for i in child2_params[key]]
+        child1_params[key] = [i / sum(child1_params[key])
+                              for i in child1_params[key]]
+        child2_params[key] = [i / sum(child2_params[key])
+                              for i in child2_params[key]]
 
     child1 = self.model_cls(**child1_params)
     child2 = self.model_cls(**child2_params)
@@ -195,15 +213,18 @@ class GeneticOptimizer:
       # with the best current generation models
       next_gen_fitness = [get_fitness(child) for child in next_gen]
       population_fitness = [get_fitness(parent) for parent in self.population]
-      worst_children_indices = np.array(next_gen_fitness).argsort().tolist()[:self.keep_best]
+      worst_children_indices = np.array(next_gen_fitness).argsort().\
+        tolist()[:self.keep_best]
       best_parent_indices = np.array(population_fitness).argsort().tolist()
       best_parent_indices.reverse()
       best_parent_indices = best_parent_indices[:self.keep_best]
-      for bad_child_index, good_parent_index in zip(worst_children_indices, best_parent_indices):
+      for bad_child_index, good_parent_index in zip(worst_children_indices,
+                                                    best_parent_indices):
         _ = next_gen.pop(bad_child_index)
         next_gen.append(self.population[good_parent_index])
 
-      # replace population with new generation and get new fittest in population
+      # replace population with new generation and get new fittest in
+      # population
       self.population = next_gen
       fittest_in_population = self.find_fittest()
       if fittest_in_population.fitness > fittest_so_far.fitness:

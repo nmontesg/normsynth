@@ -47,7 +47,8 @@ class Individual:
     # evader agents:
     else:
       if np.random.uniform(0, 1) < self.model.catch:
-        payment = self.wealth * self.model.collecting_rates[self.segment] * (1 + self.model.fine_rate)
+        payment = self.wealth * self.model.collecting_rates[self.segment] * \
+          (1 + self.model.fine_rate)
         if payment >= self.wealth:
           payment = self.wealth
           self.model.common_fund += payment
@@ -63,20 +64,22 @@ class Society:
   A very simple of a society where taxes are collected and redistributed.
   """
 
-  def __init__(self, num_agents, num_evaders, collecting_rates, redistribution_rates, invest_rate, catch, fine_rate):
+  def __init__(self, num_agents, num_evaders, collecting_rates, 
+               redistribution_rates, invest_rate, catch, fine_rate):
     assert len(collecting_rates) == len(
-      redistribution_rates), "different number of collecting and redistributing segments."
+      redistribution_rates), "different number of collecting and \
+      redistributing segments."
     self.num_segments = len(collecting_rates)  # number of segments
     self.num_agents = num_agents  # number of agents
     assert num_evaders <= self.num_agents, "more evaders than agents"
     self.num_evaders = num_evaders  # number of evader agents
     
     self.collecting_rates = collecting_rates  # collecting rates by group
-    self.redistribution_rates = redistribution_rates  # redistribution rates by group
+    self.redistribution_rates = redistribution_rates  # redist. rates by group
     self.catch = catch  # probability of catching an evader
     self.fine_rate = fine_rate  # fine to be imposed if an evader in caught
     
-    self.invest_rate = invest_rate  # interest return to the investment of the common fund
+    self.invest_rate = invest_rate  # interest return to the investment
     self.common_fund = 0.  # collected taxes for each transition
 
     # create agents
@@ -86,7 +89,8 @@ class Society:
       self.agents.append(a)
       
     # assign some of the agents as evaders randomly
-    evaders = np.random.choice(self.agents, size=self.num_evaders, replace=False)
+    evaders = np.random.choice(self.agents, size=self.num_evaders,
+                               replace=False)
     for ev in evaders:
       ev.is_evader = True
 
@@ -110,13 +114,14 @@ class Society:
       for ag in sorted_agents[n * cut_index: (n + 1) * cut_index]:
         setattr(ag, 'segment', n)
       try:
-        [setattr(ag, 'segment', n) for ag in sorted_agents[(n + 1) * cut_index:]]
+        [setattr(ag, 'segment', n) for ag in sorted_agents[(n + 1)*cut_index:]]
       except:
         pass
 
   def step(self):
     """
-    Taxes and (if any) fines are collected into the common fund, and redistributed with interest.
+    Taxes and (if any) fines are collected into the common fund, and 
+    redistributed with interest.
     """
     self.common_fund = 0.
     # collect taxes from all agents
@@ -124,8 +129,9 @@ class Society:
       _ = ind.step()
     # redistribute common fund
     for ind in self.agents:
-      payback = self.common_fund * (1 + self.invest_rate) * self.redistribution_rates[
-        ind.segment] * self.num_segments / self.num_agents
+      payback = self.common_fund * (1 + self.invest_rate) * \
+        self.redistribution_rates[ind.segment] * self.num_segments \
+          / self.num_agents
       ind.wealth += payback
       ind.payback = payback
     # recompute segments

@@ -53,7 +53,8 @@ for v_i, v_j in itertools.product(values, repeat=2):
   with open(filename, "rb") as file:
     model = pickle.load(file)
   algn = compute_alignment(model, v_j)
-  print("v_i {:12} -- v_j {:12} -- Algn {:.4f}".format(v_i, v_j, round(algn, 4)))
+  print("v_i {:12} -- v_j {:12} -- Algn {:.4f}".format(v_i, v_j,
+                                                       round(algn, 4)))
 
 
 #%% Plots
@@ -70,10 +71,12 @@ def plot_initial_distribution(model):
       color = "black"
       size = 750
       linewidth = 1.5
-    ax.scatter(ag.wealth, 3, color=color, s=size, marker="|", linewidth=linewidth, zorder=10)
+    ax.scatter(ag.wealth, 3, color=color, s=size, marker="|",
+               linewidth=linewidth, zorder=10)
   binwidth = 12.5
   bins = np.arange(0, max(agent_wealth) + binwidth, binwidth)
-  ax.hist(agent_wealth, bins=bins, edgecolor="black", color="blue", zorder=0, linewidth=2.5, fc=(0, 0, 1, 0.25))
+  ax.hist(agent_wealth, bins=bins, edgecolor="black", color="blue", zorder=0,
+          linewidth=2.5, fc=(0, 0, 1, 0.25))
   ax.set_xlabel('Wealth')
   ax.set_ylabel('Number of agents')
   ax.set_xticks(np.arange(0, max(agent_wealth) + binwidth*2, binwidth*2))
@@ -107,10 +110,12 @@ def plot_final_equality(model):
       color = "black"
       size = 1000
       linewidth = 1.5
-    ax.scatter(ag.wealth, 15, color=color, s=size, marker="|", linewidth=linewidth, zorder=10)
+    ax.scatter(ag.wealth, 15, color=color, s=size, marker="|",
+               linewidth=linewidth, zorder=10)
   binwidth = 12.5
   bins = np.arange(0, max(agent_wealth) + binwidth, binwidth)
-  ax.hist(agent_wealth, bins=bins, edgecolor="black", color="red", zorder=0, linewidth=2.5, fc=(0, 1, 0, 0.25))
+  ax.hist(agent_wealth, bins=bins, edgecolor="black", color="red", zorder=0,
+          linewidth=2.5, fc=(0, 1, 0, 0.25))
   ax.set_xlabel('Wealth')
   ax.set_ylabel('Number of agents')
   ax.set_xticks(np.arange(0, max(agent_wealth) + binwidth*2, binwidth*2))
@@ -143,10 +148,12 @@ def plot_final_fairness(model):
       color = "black"
       size = 1000
       linewidth = 1.5
-    ax.scatter(ag.wealth, 3, color=color, s=size, marker="|", linewidth=linewidth, zorder=10)
+    ax.scatter(ag.wealth, 3, color=color, s=size, marker="|",
+               linewidth=linewidth, zorder=10)
   binwidth = 12.5
   bins = np.arange(0, max(agent_wealth) + binwidth, binwidth)
-  ax.hist(agent_wealth, bins=bins, edgecolor="black", color="red", zorder=0, linewidth=2.5, fc=(1, 0, 0, 0.25))
+  ax.hist(agent_wealth, bins=bins, edgecolor="black", color="red", zorder=0,
+          linewidth=2.5, fc=(1, 0, 0, 0.25))
   ax.set_xlabel('Wealth')
   ax.set_ylabel('Number of agents')
   ax.set_xticks(np.arange(0, max(agent_wealth) + binwidth*2, binwidth*2))
