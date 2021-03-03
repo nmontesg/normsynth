@@ -9,8 +9,6 @@ Created on Wed Oct  7 07:29:17 2020
 plots.
 """
 
-#%% Imports
-
 import pickle
 import itertools
 import numpy as np
@@ -20,8 +18,6 @@ plt.rcParams.update({'font.size': 36})
 from tax_model import Society
 from alignment import compute_alignment, length
 
-
-#%% Inspect optimal models
 
 values = ['equality', 'fairness']
 
@@ -39,25 +35,7 @@ def print_model_data(model_filename):
   print("\tFine:", fine)
   print("\tOptimal alignment: {:.2f}".format(round(model.fitness, 2)))
   print("\n")
-  
-for v in values:
-  print("Optimal model with respect to " + v + ":")
-  filename = "optimal_models/solution_" + v + ".model"
-  print_model_data(filename)
-  
-  
-#%% Compute cross alignments
 
-for v_i, v_j in itertools.product(values, repeat=2):
-  filename = "optimal_models/solution_" + v_i + ".model"
-  with open(filename, "rb") as file:
-    model = pickle.load(file)
-  algn = compute_alignment(model, v_j)
-  print("v_i {:12} -- v_j {:12} -- Algn {:.4f}".format(v_i, v_j,
-                                                       round(algn, 4)))
-
-
-#%% Plots
 
 def plot_initial_distribution(model):
   agent_wealth = [ag.wealth for ag in model.agents]
@@ -162,15 +140,34 @@ def plot_final_fairness(model):
   plt.show()
 
 
-filename = "optimal_models/solution_equality.model"
-with open(filename, "rb") as file:
-  model = pickle.load(file)
-  
-plot_initial_distribution(model)
-plot_final_equality(model)
 
-filename = "optimal_models/solution_fairness.model"
-with open(filename, "rb") as file:
-  model = pickle.load(file)
+if __name__ == '__main__':
   
-plot_final_fairness(model)
+  # inspect model parameters
+  for v in values:
+    print("Optimal model with respect to " + v + ":")
+    filename = "optimal_models/solution_" + v + ".model"
+    print_model_data(filename)
+    
+  # compute cross alignments
+  for v_i, v_j in itertools.product(values, repeat=2):
+    filename = "optimal_models/solution_" + v_i + ".model"
+    with open(filename, "rb") as file:
+      model = pickle.load(file)
+    algn = compute_alignment(model, v_j)
+    print("v_i {:12} -- v_j {:12} -- Algn {:.4f}".format(v_i, v_j,
+                                                         round(algn, 4)))
+  
+  # plots
+  filename = "optimal_models/solution_equality.model"
+  with open(filename, "rb") as file:
+    model = pickle.load(file)
+    
+  plot_initial_distribution(model)
+  plot_final_equality(model)
+  
+  filename = "optimal_models/solution_fairness.model"
+  with open(filename, "rb") as file:
+    model = pickle.load(file)
+    
+  plot_final_fairness(model)
