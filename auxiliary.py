@@ -186,7 +186,7 @@ def make_giff(filename, value, hist_color, length=10):
     reset_model.step()
     fig = plot_state(reset_model, hist_color, i)
     fig.savefig(folder + "/" + value + "-" + str(i) + ".png", dpi=400)
-  
+    
 
 if __name__ == '__main__':
   
