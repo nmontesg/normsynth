@@ -138,8 +138,55 @@ def plot_final_fairness(model):
   ax.set_xlim(0, 100)
   fig.tight_layout()
   plt.show()
+  
+def plot_state(model, hist_color, n):
+  agent_wealth = [ag.wealth for ag in model.agents]
+  fig, ax = plt.subplots(figsize=(12, 10))
+  for ag in model.agents:
+    if ag.is_evader:
+      color = 'red'
+      size = 3500
+      linewidth = 2.5
+    else:
+      color = "black"
+      size = 1000
+      linewidth = 1.5
+    ax.scatter(ag.wealth, 3, color=color, s=size, marker="|",
+                linewidth=linewidth, zorder=10)
+  binwidth = 12.5
+  bins = np.arange(0, max(agent_wealth) + binwidth, binwidth)
+  ax.hist(agent_wealth, bins=bins, edgecolor="black", color=hist_color,
+          zorder=0, linewidth=2.5, alpha=0.3)
+  ax.set_xlabel('Wealth')
+  ax.set_ylabel('Number of agents')
+  ax.set_xticks(np.arange(0, max(agent_wealth) + binwidth*2, binwidth*2))
+  ax.set_xlim(0, 100)
+  ax.set_ylim(0, 200)
+  ax.text(2.5, 175, "State "+str(n))
+  fig.tight_layout()
+  return fig
 
-
+def make_giff(filename, value, hist_color, length=10):
+  with open(filename, "rb") as file:
+    model = pickle.load(file)
+  model_params = {
+    'num_agents': model.num_agents,
+    'num_evaders': model.num_evaders,
+    'collecting_rates': model.collecting_rates,
+    'redistribution_rates': model.redistribution_rates,
+    'invest_rate': model.invest_rate,
+    'catch': model.catch,
+    'fine_rate': model.fine_rate
+  }
+  folder = value
+  reset_model = Society(**model_params)
+  fig = plot_state(reset_model, hist_color, 0)
+  fig.savefig(folder + "/" + value + "-0.png", dpi=400)
+  for i in range(1, length+1):
+    reset_model.step()
+    fig = plot_state(reset_model, hist_color, i)
+    fig.savefig(folder + "/" + value + "-" + str(i) + ".png", dpi=400)
+  
 
 if __name__ == '__main__':
   
@@ -156,7 +203,7 @@ if __name__ == '__main__':
       model = pickle.load(file)
     algn = compute_alignment(model, v_j)
     print("v_i {:12} -- v_j {:12} -- Algn {:.4f}".format(v_i, v_j,
-                                                         round(algn, 4)))
+                                                          round(algn, 4)))
   
   # plots
   filename = "optimal_models/solution_equality.model"
@@ -171,3 +218,12 @@ if __name__ == '__main__':
     model = pickle.load(file)
     
   plot_final_fairness(model)
+  
+  # build animations
+  make_giff(filename="optimal_models/solution_equality.model",
+            value="equality",
+            hist_color="cyan")
+  
+  make_giff(filename="optimal_models/solution_fairness.model",
+            value="fairness",
+            hist_color="chartreuse")
