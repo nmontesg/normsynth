@@ -270,7 +270,7 @@ params_fixed = {
 
 if __name__ == '__main__':
 
-  v = 'equality'
+  v = 'aggregation'
   
   print("*** Optimization with respect to value {} ***\n".format(v.upper()))
   optimizer = GeneticOptimizer(

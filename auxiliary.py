@@ -19,7 +19,7 @@ from tax_model import Society
 from alignment import compute_alignment, length
 
 
-values = ['equality', 'fairness']
+values = ['equality', 'fairness', 'aggregation']
 
 def print_model_data(model_filename):
   with open(model_filename, "rb") as file:
@@ -209,7 +209,6 @@ if __name__ == '__main__':
   filename = "optimal_models/solution_equality.model"
   with open(filename, "rb") as file:
     model = pickle.load(file)
-    
   plot_initial_distribution(model)
   plot_final_equality(model)
   
@@ -219,11 +218,15 @@ if __name__ == '__main__':
     
   plot_final_fairness(model)
   
-  # build animations
-  make_giff(filename="optimal_models/solution_equality.model",
-            value="equality",
-            hist_color="cyan")
+  # # build animations
+  # make_giff(filename="optimal_models/solution_equality.model",
+  #           value="equality",
+  #           hist_color="cyan")
   
-  make_giff(filename="optimal_models/solution_fairness.model",
-            value="fairness",
-            hist_color="chartreuse")
+  # make_giff(filename="optimal_models/solution_fairness.model",
+  #           value="fairness",
+  #           hist_color="chartreuse")
+  
+  # make_giff(filename="optimal_models/solution_aggregation.model",
+  #           value="fairness",
+  #           hist_color="chartreuse")

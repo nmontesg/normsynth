@@ -19,8 +19,8 @@ paths = 500  # number of paths for evaluation of fitness
 
 def equality_single_path(model):
   """
-	Evaluate a model by its alignment with respect to equality after one path.
-	"""
+  Evaluate a model by its alignment with respect to equality after one path.
+  """
   for _ in range(length):
     model.step()
   agent_wealths = [agent.wealth for agent in model.agents]
@@ -40,6 +40,29 @@ def fairness_single_path(model):
   evaders_segment = [True for ev in evaders if ev.segment == 0]
   proportion = len(evaders_segment) / model.num_evaders
   return (2*proportion - 1)
+
+
+def aggregation_single_path(model):
+  """
+  Evaluate a model by its alignment with respect to the aggregated equality
+  and fairness.
+  """
+  for _ in range(length):
+    model.step()
+  # evaluate the fairness
+  evaders = [ag for ag in model.agents if ag.is_evader]
+  evaders_segment = [True for ev in evaders if ev.segment == 0]
+  proportion = len(evaders_segment) / model.num_evaders
+  fairness = 2*proportion - 1
+  # evaluate the equality
+  agent_wealths = [agent.wealth for agent in model.agents]
+  numerator = sum([sum([abs(x_i-x_j) for x_j in agent_wealths])
+                  for x_i in agent_wealths])
+  gini_index = numerator / (2 * model.num_agents**2 * np.mean(agent_wealths))
+  equality = 1 - 2*gini_index
+  if fairness < 0 and equality < 0:
+    return -fairness*equality
+  return fairness*equality
 
 
 def compute_alignment(model, value):
