@@ -26,7 +26,8 @@ from tax_model import Society
 baseline_params = {'num_agents': params_fixed['num_agents'],
                    'num_evaders': params_fixed['num_evaders'],
                    'collecting_rates': [0. for _ in range(segments)],
-                   'redistribution_rates': [1/segments for _ in range(segments)],
+                   'redistribution_rates': [1/segments for _ in \
+                                            range(segments)],
                    'invest_rate': params_fixed['invest_rate'],
                    'catch': 0.,
                    'fine_rate': 0.}
@@ -51,8 +52,8 @@ def get_society_params(model):
   return params
 
 
-def shapley_value(model_cls, individual_norm, baseline_parameters, optimal_parameters,
-                  norm_coalition, value):
+def shapley_value(model_cls, individual_norm, baseline_parameters,
+                  optimal_parameters, norm_coalition, value):
   """
   Compute the Shapley value with respect to a value for a specified norm.
   Args:
@@ -68,7 +69,8 @@ def shapley_value(model_cls, individual_norm, baseline_parameters, optimal_param
   variable_norms = copy.deepcopy(norm_coalition)
   variable_norms.remove(individual_norm)
   all_coalitions = []
-  for comb in product(('baseline_parameters', 'optimal_parameters'), repeat=N-1):
+  for comb in product(('baseline_parameters', 'optimal_parameters'),
+                      repeat=N-1):
     all_coalitions.append({})
     for norm, origin in zip(variable_norms, comb):
       all_coalitions[-1][norm] = origin
@@ -89,7 +91,8 @@ def shapley_value(model_cls, individual_norm, baseline_parameters, optimal_param
     algn_N = compute_alignment(model_N, value)
     arr = np.array(list(coalition.values()))
     N_prime = int(np.where(arr == 'optimal_parameters', True, False).sum())
-    shapley += math.factorial(N_prime) * math.factorial(N-N_prime-1) / math.factorial(N) * (algn_N_union_n - algn_N)
+    shapley += math.factorial(N_prime) * math.factorial(N-N_prime-1) / \
+      math.factorial(N) * (algn_N_union_n - algn_N)
   return shapley
 
 
@@ -99,18 +102,21 @@ if __name__ == '__main__':
   baseline_evolution = []
   for _ in range(paths):
     baseline_model = Society(**baseline_params)
-    initial_global_state = [(a.wealth, a.position) for a in baseline_model.agents]
+    initial_global_state = [(a.wealth, a.position) for a in
+                            baseline_model.agents]
     for _ in range(length):
       baseline_model.step()
-    final_global_state = [(a.wealth, a.position) for a in baseline_model.agents]
+    final_global_state = [(a.wealth, a.position) for a in
+                          baseline_model.agents]
     has_baseline_evolved = not initial_global_state == final_global_state
     baseline_evolution.append(has_baseline_evolved)
   has_baseline_evolved = bool(sum(baseline_evolution))
-  print("Is the baseline normative system causing model evolution? {}".format(has_baseline_evolved))
+  print("Is the baseline normative system causing model evolution? {}"\
+        .format(has_baseline_evolved))
   
   # compute and save shapley values
   values = ['equality', 'fairness', 'aggregation']
-  v = values[0]
+  v = values[2]
   
   filename = "optimal_models/solution_" + v + ".model"
   with open(filename, "rb") as file:
@@ -125,7 +131,8 @@ if __name__ == '__main__':
   with open('shapley_values_{}.json'.format(v), 'w') as file:
     json.dump(shapley_values, file)
     
-  print("Shapley values for the optimal model with respect to {}".format(v.upper()))
+  print("Shapley values for the optimal model with respect to {}"\
+        .format(v.upper()))
   for norm in coalition:
     print("\t{}: {:.2f}".format(norm, shapley_values[norm]))
   print("\n")

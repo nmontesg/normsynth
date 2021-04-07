@@ -53,18 +53,18 @@ def plot_initial_distribution(model):
                linewidth=linewidth, zorder=10)
   binwidth = 12.5
   bins = np.arange(0, max(agent_wealth) + binwidth, binwidth)
-  ax.hist(agent_wealth, bins=bins, edgecolor="black", color="blue", zorder=0,
-          linewidth=2.5, fc=(0, 0, 1, 0.25))
+  ax.hist(agent_wealth, bins=bins, edgecolor="black", color="cyan", zorder=0,
+          linewidth=2.5, alpha=0.25)
   ax.set_xlabel('Wealth')
   ax.set_ylabel('Number of agents')
   ax.set_xticks(np.arange(0, max(agent_wealth) + binwidth*2, binwidth*2))
-  ax.set_ylim(0, 40)
+  ax.set_ylim(0, 200)
   ax.set_xlim(0, 100)
   fig.tight_layout()
   plt.show()
   
   
-def plot_final_equality(model):
+def plot_final(model, hist_color):
   model_params = {
     'num_agents': model.num_agents,
     'num_evaders': model.num_evaders,
@@ -92,52 +92,16 @@ def plot_final_equality(model):
                linewidth=linewidth, zorder=10)
   binwidth = 12.5
   bins = np.arange(0, max(agent_wealth) + binwidth, binwidth)
-  ax.hist(agent_wealth, bins=bins, edgecolor="black", color="red", zorder=0,
-          linewidth=2.5, fc=(0, 1, 0, 0.25))
+  ax.hist(agent_wealth, bins=bins, edgecolor="black", color=hist_color,
+          zorder=0, linewidth=2.5, alpha=0.25)
   ax.set_xlabel('Wealth')
   ax.set_ylabel('Number of agents')
   ax.set_xticks(np.arange(0, max(agent_wealth) + binwidth*2, binwidth*2))
+  ax.set_ylim(0, 200)
   ax.set_xlim(0, 100)
   fig.tight_layout()
   plt.show()
-  
-  
-def plot_final_fairness(model):
-  model_params = {
-    'num_agents': model.num_agents,
-    'num_evaders': model.num_evaders,
-    'collecting_rates': model.collecting_rates,
-    'redistribution_rates': model.redistribution_rates,
-    'invest_rate': model.invest_rate,
-    'catch': model.catch,
-    'fine_rate': model.fine_rate
-  }
-  reset_model = Society(**model_params)
-  for _ in range(length):
-    reset_model.step()
-  agent_wealth = [ag.wealth for ag in reset_model.agents]
-  fig, ax = plt.subplots(figsize=(12, 10))
-  for ag in reset_model.agents:
-    if ag.is_evader:
-      color = 'red'
-      size = 3500
-      linewidth = 2.5
-    else:
-      color = "black"
-      size = 1000
-      linewidth = 1.5
-    ax.scatter(ag.wealth, 3, color=color, s=size, marker="|",
-               linewidth=linewidth, zorder=10)
-  binwidth = 12.5
-  bins = np.arange(0, max(agent_wealth) + binwidth, binwidth)
-  ax.hist(agent_wealth, bins=bins, edgecolor="black", color="red", zorder=0,
-          linewidth=2.5, fc=(1, 0, 0, 0.25))
-  ax.set_xlabel('Wealth')
-  ax.set_ylabel('Number of agents')
-  ax.set_xticks(np.arange(0, max(agent_wealth) + binwidth*2, binwidth*2))
-  ax.set_xlim(0, 100)
-  fig.tight_layout()
-  plt.show()
+
   
 def plot_state(model, hist_color, n):
   agent_wealth = [ag.wealth for ag in model.agents]
@@ -165,6 +129,7 @@ def plot_state(model, hist_color, n):
   ax.text(2.5, 175, "State "+str(n))
   fig.tight_layout()
   return fig
+
 
 def make_giff(filename, value, hist_color, length=10):
   with open(filename, "rb") as file:
@@ -210,23 +175,27 @@ if __name__ == '__main__':
   with open(filename, "rb") as file:
     model = pickle.load(file)
   plot_initial_distribution(model)
-  plot_final_equality(model)
+  plot_final(model, 'lawngreen')
   
   filename = "optimal_models/solution_fairness.model"
   with open(filename, "rb") as file:
     model = pickle.load(file)
-    
-  plot_final_fairness(model)
+  plot_final(model, 'orangered')
   
-  # # build animations
-  # make_giff(filename="optimal_models/solution_equality.model",
-  #           value="equality",
-  #           hist_color="cyan")
+  filename = "optimal_models/solution_aggregation.model"
+  with open(filename, "rb") as file:
+    model = pickle.load(file)
+  plot_final(model, 'blueviolet')
+
+  # build animations
+  make_giff(filename="optimal_models/solution_equality.model",
+            value="equality",
+            hist_color="lawngreen")
   
-  # make_giff(filename="optimal_models/solution_fairness.model",
-  #           value="fairness",
-  #           hist_color="chartreuse")
+  make_giff(filename="optimal_models/solution_fairness.model",
+            value="fairness",
+            hist_color="orangered")
   
-  # make_giff(filename="optimal_models/solution_aggregation.model",
-  #           value="fairness",
-  #           hist_color="chartreuse")
+  make_giff(filename="optimal_models/solution_aggregation.model",
+            value="aggregation",
+            hist_color="blueviolet")
