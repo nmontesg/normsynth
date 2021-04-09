@@ -5,8 +5,8 @@ Created on Fri Sep 25 16:45:32 2020
 
 @author: nmontes
 
-@description: Compute Shapley value of individual norms in an optimal normative
-system, and the cross-alignment.
+@description: Compute Shapley value of individual norms in an optimal
+normative system, and the cross-alignment.
 """
 
 import math
@@ -61,7 +61,8 @@ def shapley_value(model_cls, individual_norm, baseline_parameters,
     - individual_norm: string with the norm to compute Shapley value of.
     - baseline_parameters: dict of parameters of baseline model.
     - optimal_parameters: dict of parameters of the optimal model.
-    - coalition: a list of strings with the name of all norms in the normative system.
+    - coalition: a list of strings with the name of all norms in the normative
+    system.
     - value: the value for which the model has been optimised.
   """
   # generate all coalitions
@@ -96,7 +97,6 @@ def shapley_value(model_cls, individual_norm, baseline_parameters,
   return shapley
 
 
-
 if __name__ == '__main__':
   # baseline model: check that it leaves the society unchanged
   baseline_evolution = []
@@ -111,19 +111,21 @@ if __name__ == '__main__':
     has_baseline_evolved = not initial_global_state == final_global_state
     baseline_evolution.append(has_baseline_evolved)
   has_baseline_evolved = bool(sum(baseline_evolution))
-  print("Is the baseline normative system causing model evolution? {}"\
+  print("Is the baseline normative system causing model evolution? {}\n"\
         .format(has_baseline_evolved))
   
   # compute and save shapley values
   values = ['equality', 'fairness', 'aggregation']
   v = values[2]
   
+  print("Shapley values for value {}:\n".format(v.upper()))
+
   filename = "optimal_models/solution_" + v + ".model"
   with open(filename, "rb") as file:
     model = pickle.load(file)
   optimal_params = get_society_params(model)
   shapley_values = {}
-  
+
   for norm in coalition:
     shapley_values[norm] = shapley_value(Society, norm, baseline_params,
                                           optimal_params, coalition, v)
@@ -136,3 +138,20 @@ if __name__ == '__main__':
   for norm in coalition:
     print("\t{}: {:.2f}".format(norm, shapley_values[norm]))
   print("\n")
+  
+  # check efficiency with respect to baseline normative system
+  sum_shapley_values = sum(shapley_values.values())
+  alignment_norms = compute_alignment(model, v)
+  model_baseline = Society(**baseline_params)
+  alignment_baseline = compute_alignment(model_baseline, v)
+  
+  print("Sum of the Shapley values: {:.3f}".format(sum_shapley_values))
+  print("Alignment of the norms: {:.3f}".format(alignment_norms))
+  print("Alignment of the baseline: {:.3f}".format(alignment_baseline))
+  print("Predicted: {:.3f} = {:.3f} - {:.3f}"\
+        .format(alignment_norms-alignment_baseline, alignment_norms,
+                alignment_baseline))
+  print("Found: {:.3f} = {:.3f} - {:.3f}"\
+        .format(sum_shapley_values, alignment_norms, alignment_baseline))
+    
+    

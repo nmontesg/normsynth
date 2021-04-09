@@ -98,7 +98,7 @@ def plot_final(model, hist_color):
   ax.set_ylabel('Number of agents')
   ax.set_xticks(np.arange(0, max(agent_wealth) + binwidth*2, binwidth*2))
   ax.set_ylim(0, 200)
-  ax.set_xlim(0, 100)
+  ax.set_xlim(0, 130)
   fig.tight_layout()
   plt.show()
 
