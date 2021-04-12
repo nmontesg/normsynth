@@ -1,3 +1,8 @@
 # Value-Guided Synthesis of Parametric Normative Systems (Code)
 
-This repository contains the code to complement the paper _Value-Guided Synthesis of Parametric Normative Systems_, by N. Montes and C. Sierra, presented for acceptance at the Autonomous Agents and Multi Agent Systems 2021 Conference.
+This repository contains the code to complement the paper:
+
+Nieves Montes and Carles Sierra. 2021. Value-Guided Synthesis of Parametric
+Normative Systems. In Proc. of the 20th International Conference on
+Autonomous Agents and Multiagent Systems (AAMAS 2021), Online, May 3–7,
+2021, IFAAMAS, 9 pages.
