@@ -98,6 +98,7 @@ def shapley_value(model_cls, individual_norm, baseline_parameters,
 
 
 if __name__ == '__main__':
+  
   # baseline model: check that it leaves the society unchanged
   baseline_evolution = []
   for _ in range(paths):

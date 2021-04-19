@@ -11,12 +11,14 @@ plots.
 
 import pickle
 import itertools
+import json
 import numpy as np
 import matplotlib.pyplot as plt
 plt.rcParams.update({'font.size': 36})
 
 from tax_model import Society
 from alignment import compute_alignment, length
+from optimiser import params_fixed, segments
 
 
 values = ['equality', 'fairness', 'aggregation']
@@ -152,50 +154,86 @@ def make_giff(filename, value, hist_color, length=10):
     fig = plot_state(reset_model, hist_color, i)
     fig.savefig(folder + "/" + value + "-" + str(i) + ".png", dpi=400)
     
+    
+def shapley_values_efficiency(value):
+  baseline_params = {'num_agents': params_fixed['num_agents'],
+                     'num_evaders': params_fixed['num_evaders'],
+                     'collecting_rates': [0. for _ in range(segments)],
+                     'redistribution_rates': [1/segments for _ in \
+                                              range(segments)],
+                     'invest_rate': params_fixed['invest_rate'],
+                     'catch': 0.,
+                     'fine_rate': 0.}
+  with open("shapley_values/shapley_values_{}.json".format(value)) as file:
+    shapley_values = json.load(file)
+  print(shapley_values)
+  filename = "optimal_models/solution_{}.model".format(value)
+  with open(filename, "rb") as file:
+    model = pickle.load(file)
+  
+  sum_shapley_values = sum(shapley_values.values())
+  alignment_norms = compute_alignment(model, value)
+  model_baseline = Society(**baseline_params)
+  alignment_baseline = compute_alignment(model_baseline, value)
+  
+  print("Sum of the Shapley values: {:.3f}".format(sum_shapley_values))
+  print("Alignment of the norms: {:.3f}".format(alignment_norms))
+  print("Alignment of the baseline: {:.3f}".format(alignment_baseline))
+  print("Predicted: {:.3f} = {:.3f} - {:.3f}"\
+        .format(alignment_norms-alignment_baseline, alignment_norms,
+                alignment_baseline))
+  print("Found: {:.3f} = {:.3f} - {:.3f}\n"\
+        .format(sum_shapley_values, alignment_norms, alignment_baseline))
+
+
 
 if __name__ == '__main__':
   
   # inspect model parameters
-  for v in values:
-    print("Optimal model with respect to " + v + ":")
-    filename = "optimal_models/solution_" + v + ".model"
-    print_model_data(filename)
+  # for v in values:
+  #   print("Optimal model with respect to " + v + ":")
+  #   filename = "optimal_models/solution_" + v + ".model"
+  #   print_model_data(filename)
     
-  # compute cross alignments
-  for v_i, v_j in itertools.product(values, repeat=2):
-    filename = "optimal_models/solution_" + v_i + ".model"
-    with open(filename, "rb") as file:
-      model = pickle.load(file)
-    algn = compute_alignment(model, v_j)
-    print("v_i {:12} -- v_j {:12} -- Algn {:.4f}".format(v_i, v_j,
-                                                          round(algn, 4)))
+  # # compute cross alignments
+  # for v_i, v_j in itertools.product(values, repeat=2):
+  #   filename = "optimal_models/solution_" + v_i + ".model"
+  #   with open(filename, "rb") as file:
+  #     model = pickle.load(file)
+  #   algn = compute_alignment(model, v_j)
+  #   print("v_i {:12} -- v_j {:12} -- Algn {:.4f}".format(v_i, v_j,
+  #                                                         round(algn, 4)))
   
-  # plots
-  filename = "optimal_models/solution_equality.model"
-  with open(filename, "rb") as file:
-    model = pickle.load(file)
-  plot_initial_distribution(model)
-  plot_final(model, 'lawngreen')
+  # # plots
+  # filename = "optimal_models/solution_equality.model"
+  # with open(filename, "rb") as file:
+  #   model = pickle.load(file)
+  # plot_initial_distribution(model)
+  # plot_final(model, 'lawngreen')
   
-  filename = "optimal_models/solution_fairness.model"
-  with open(filename, "rb") as file:
-    model = pickle.load(file)
-  plot_final(model, 'orangered')
+  # filename = "optimal_models/solution_fairness.model"
+  # with open(filename, "rb") as file:
+  #   model = pickle.load(file)
+  # plot_final(model, 'orangered')
   
-  filename = "optimal_models/solution_aggregation.model"
-  with open(filename, "rb") as file:
-    model = pickle.load(file)
-  plot_final(model, 'blueviolet')
+  # filename = "optimal_models/solution_aggregation.model"
+  # with open(filename, "rb") as file:
+  #   model = pickle.load(file)
+  # plot_final(model, 'blueviolet')
 
-  # build animations
-  make_giff(filename="optimal_models/solution_equality.model",
-            value="equality",
-            hist_color="lawngreen")
+  # # build animations
+  # make_giff(filename="optimal_models/solution_equality.model",
+  #           value="equality",
+  #           hist_color="lawngreen")
   
-  make_giff(filename="optimal_models/solution_fairness.model",
-            value="fairness",
-            hist_color="orangered")
+  # make_giff(filename="optimal_models/solution_fairness.model",
+  #           value="fairness",
+  #           hist_color="orangered")
   
-  make_giff(filename="optimal_models/solution_aggregation.model",
-            value="aggregation",
-            hist_color="blueviolet")
+  # make_giff(filename="optimal_models/solution_aggregation.model",
+  #           value="aggregation",
+  #           hist_color="blueviolet")
+  
+  # check efficiency of the Shapley values with respect to the relative
+  for v in values:
+    shapley_values_efficiency(v)
