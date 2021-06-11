@@ -16,7 +16,7 @@ import pickle
 import numpy as np
 
 from tax_model import Society
-from alignment import compute_alignment
+from alignment import compute_alignment, compute_compatibility_sample
 
 
 class GeneticOptimizer:
@@ -29,7 +29,7 @@ class GeneticOptimizer:
     - params_fixed: a dictionary of the model parameters that stay fixed
     throughout the search. It has the format: {key: fixed value}.
     - value: target value. Options are 'equality', 'fairness' and
-    'aggregation'.
+    'aggregation'. Default None.
     - pop_size: population size for the genetic search. Default 50.
     - p: p parameter for intermediate recombination. Default 0.25.
     - keep_best: from one iteration of the genetic search to the next, keep
@@ -39,11 +39,15 @@ class GeneticOptimizer:
     - max_partial_iter: maximum number of iterations to perform in the genetic
     search without an update on the candidate solution before halting.
     Default 20.
+    - maximize_compatibility: whether to perform the optimization to find the
+    normative system that maximizes the compatibility between the values.
+    Default False.
   """
 
-  def __init__(self, model_cls, params_optimize, params_fixed, value,
+  def __init__(self, model_cls, params_optimize, params_fixed, value=None,
               pop_size=100, p=0.25, keep_best=5, max_total_iter=500,
-              max_partial_iter=50, fitness_threshold=0.90):
+              max_partial_iter=50, fitness_threshold=0.9,
+              maximize_compatibility=False):
     self.model_cls = model_cls
     self.params_optimize = params_optimize
     self.params_fixed = params_fixed
@@ -55,6 +59,7 @@ class GeneticOptimizer:
     self.max_partial_iter = max_partial_iter
     self.fitness_threshold = fitness_threshold
     self.population = []
+    self.maximize_compatibility = maximize_compatibility
 
   def make_random_candidate(self):
     """
@@ -75,7 +80,10 @@ class GeneticOptimizer:
         init_params[key] = [i / sum(init_params[key])
                             for i in init_params[key]]
     model = self.model_cls(**init_params)
-    model.fitness = compute_alignment(model, self.value)
+    if self.maximize_compatibility:
+      model.fitness = compute_compatibility_sample(model)
+    else:
+      model.fitness = compute_alignment(model, self.value)
     return model
 
 
@@ -172,8 +180,12 @@ class GeneticOptimizer:
 
     child1 = self.model_cls(**child1_params)
     child2 = self.model_cls(**child2_params)
-    child1.fitness = compute_alignment(child1, self.value)
-    child2.fitness = compute_alignment(child2, self.value)
+    if self.maximize_compatibility:
+      child1.fitness = compute_compatibility_sample(child1)
+      child2.fitness = compute_compatibility_sample(child2)
+    else:
+      child1.fitness = compute_alignment(child1, self.value)
+      child2.fitness = compute_alignment(child2, self.value)
     return child1, child2
 
 
@@ -192,7 +204,10 @@ class GeneticOptimizer:
       return fittest_so_far
     
     # save fittest so far
-    filename = "solution_" + self.value + ".model"
+    if self.maximize_compatibility:
+      filename = "solution_max_compatibility.model"
+    else:
+      filename = "solution_" + self.value + ".model"
     with open(filename, "wb") as file:
       pickle.dump(fittest_so_far, file)
 
@@ -270,14 +285,22 @@ params_fixed = {
 
 if __name__ == '__main__':
 
-  v = 'aggregation'
+  # v = 'aggregation'
   
-  print("*** Optimization with respect to value {} ***\n".format(v.upper()))
+  # print("*** Optimization with respect to value {} ***\n".format(v.upper()))
+  # optimizer = GeneticOptimizer(
+  #   model_cls=Society,
+  #   params_optimize=params_optimize,
+  #   params_fixed=params_fixed,
+  #   value=v
+  # )
+  
+  print("*** Optimization for maximum compatibility ***\n")
   optimizer = GeneticOptimizer(
     model_cls=Society,
     params_optimize=params_optimize,
     params_fixed=params_fixed,
-    value=v
+    maximize_compatibility=True
   )
   
   optimal_model = optimizer.genetic_search()

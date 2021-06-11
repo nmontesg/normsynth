@@ -10,7 +10,6 @@ plots.
 """
 
 import pickle
-import itertools
 import json
 import numpy as np
 import matplotlib.pyplot as plt
@@ -235,5 +234,13 @@ if __name__ == '__main__':
   #           hist_color="blueviolet")
   
   # check efficiency of the Shapley values with respect to the relative
+  # for v in values:
+  #   shapley_values_efficiency(v)
+  
+  with open('solution_max_compatibility.model', "rb") as file:
+    model = pickle.load(file)
+    
   for v in values:
-    shapley_values_efficiency(v)
+    algn = compute_alignment(model, v)
+    print("Alignment w.r.t. {}: {:.2f}".format(v, algn))
+  
