@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 plt.rcParams.update({'font.size': 36})
 
 from tax_model import Society
-from alignment import compute_alignment, length
+from alignment import compute_alignment, compute_compatibility_sample, length
 from optimiser import params_fixed, segments
 
 
@@ -237,10 +237,26 @@ if __name__ == '__main__':
   # for v in values:
   #   shapley_values_efficiency(v)
   
-  with open('solution_max_compatibility.model', "rb") as file:
-    model = pickle.load(file)
-    
-  for v in values:
-    algn = compute_alignment(model, v)
-    print("Alignment w.r.t. {}: {:.2f}".format(v, algn))
   
+  # maximum compatibility normative system
+  print_model_data('optimal_models/solution_max_compatibility.model')
+  
+  with open('optimal_models/solution_max_compatibility.model', "rb") as file:
+    model = pickle.load(file)
+      
+  # d = compute_compatibility_sample(model)  
+  # print("Compatibility: {:.2f}".format(d))
+  
+  # for v in values:
+  #   algn = compute_alignment(model, v)
+  #   print("Alignment w.r.t. {}: {:.2f}".format(v, algn))
+  
+  # plots
+  filename = "optimal_models/solution_max_compatibility.model"
+  with open(filename, "rb") as file:
+    model = pickle.load(file)
+  plot_final(model, 'mediumspringgreen')
+  
+  # make_giff(filename="optimal_models/solution_max_compatibility.model",
+  #           value="max-compatibility",
+  #           hist_color="mediumspringgreen")
