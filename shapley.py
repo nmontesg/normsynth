@@ -13,7 +13,7 @@ import math
 import copy
 import pickle
 import json
-from itertools import product
+from itertools import product, combinations
 
 import numpy as np
 
@@ -97,62 +97,110 @@ def shapley_value(model_cls, individual_norm, baseline_parameters,
   return shapley
 
 
+
+def check_monotone(value):
+  """
+  Check that the optimal normative system with respect to a value is monotone
+  for the alignment with respect to it.
+  """
+  filename = "optimal_models/solution_" + value + ".model"
+  with open(filename, "rb") as file:
+    model = pickle.load(file)
+  model_params = get_society_params(model)
+  all_results = []
+  for i in range(len(coalition)):
+    all_N1 = combinations(coalition, i)
+    for N1 in all_N1:
+      model_N1_params = baseline_params
+      for p in N1:
+        model_N1_params[p] = model_params[p]
+      model_N1 = Society(**model_N1_params)
+      algn_N1 = compute_alignment(model_N1, value)
+
+      # only add one extra individual norm to N1
+      to_be_added = list(set(coalition)-set(N1))
+      model_N2_params = model_N1_params
+      for n in to_be_added:
+        model_N2_params[n] = model_params[n]
+        model_N2 = Society(**model_N2_params)
+        algn_N2 = compute_alignment(model_N2, value)
+        all_results.append({'N1': N1, 'n': n, 'algn_N1': algn_N1,
+                            'algn_N2': algn_N2})
+  return all_results
+
+
 if __name__ == '__main__':
   
-  # baseline model: check that it leaves the society unchanged
-  baseline_evolution = []
-  for _ in range(paths):
-    baseline_model = Society(**baseline_params)
-    initial_global_state = [(a.wealth, a.position) for a in
-                            baseline_model.agents]
-    for _ in range(length):
-      baseline_model.step()
-    final_global_state = [(a.wealth, a.position) for a in
-                          baseline_model.agents]
-    has_baseline_evolved = not initial_global_state == final_global_state
-    baseline_evolution.append(has_baseline_evolved)
-  has_baseline_evolved = bool(sum(baseline_evolution))
-  print("Is the baseline normative system causing model evolution? {}\n"\
-        .format(has_baseline_evolved))
+  # # baseline model: check that it leaves the society unchanged
+  # baseline_evolution = []
+  # for _ in range(paths):
+  #   baseline_model = Society(**baseline_params)
+  #   initial_global_state = [(a.wealth, a.position) for a in
+  #                           baseline_model.agents]
+  #   for _ in range(length):
+  #     baseline_model.step()
+  #   final_global_state = [(a.wealth, a.position) for a in
+  #                         baseline_model.agents]
+  #   has_baseline_evolved = not initial_global_state == final_global_state
+  #   baseline_evolution.append(has_baseline_evolved)
+  # has_baseline_evolved = bool(sum(baseline_evolution))
+  # print("Is the baseline normative system causing model evolution? {}\n"\
+  #       .format(has_baseline_evolved))
   
   # compute and save shapley values
   values = ['equality', 'fairness', 'aggregation']
-  v = values[2]
+  # v = values[2]
   
-  print("Shapley values for value {}:\n".format(v.upper()))
+  # print("Shapley values for value {}:\n".format(v.upper()))
 
-  filename = "optimal_models/solution_" + v + ".model"
-  with open(filename, "rb") as file:
-    model = pickle.load(file)
-  optimal_params = get_society_params(model)
-  shapley_values = {}
+  # filename = "optimal_models/solution_" + v + ".model"
+  # with open(filename, "rb") as file:
+  #   model = pickle.load(file)
+  # optimal_params = get_society_params(model)
+  # shapley_values = {}
 
-  for norm in coalition:
-    shapley_values[norm] = shapley_value(Society, norm, baseline_params,
-                                          optimal_params, coalition, v)
+  # for norm in coalition:
+  #   shapley_values[norm] = shapley_value(Society, norm, baseline_params,
+  #                                         optimal_params, coalition, v)
 
-  with open('shapley_values_{}.json'.format(v), 'w') as file:
-    json.dump(shapley_values, file)
+  # with open('shapley_values_{}.json'.format(v), 'w') as file:
+  #   json.dump(shapley_values, file)
     
-  print("Shapley values for the optimal model with respect to {}"\
-        .format(v.upper()))
-  for norm in coalition:
-    print("\t{}: {:.2f}".format(norm, shapley_values[norm]))
-  print("\n")
+  # print("Shapley values for the optimal model with respect to {}"\
+  #       .format(v.upper()))
+  # for norm in coalition:
+  #   print("\t{}: {:.2f}".format(norm, shapley_values[norm]))
+  # print("\n")
   
-  # check efficiency with respect to baseline normative system
-  sum_shapley_values = sum(shapley_values.values())
-  alignment_norms = compute_alignment(model, v)
-  model_baseline = Society(**baseline_params)
-  alignment_baseline = compute_alignment(model_baseline, v)
+  # # check efficiency with respect to baseline normative system
+  # sum_shapley_values = sum(shapley_values.values())
+  # alignment_norms = compute_alignment(model, v)
+  # model_baseline = Society(**baseline_params)
+  # alignment_baseline = compute_alignment(model_baseline, v)
   
-  print("Sum of the Shapley values: {:.3f}".format(sum_shapley_values))
-  print("Alignment of the norms: {:.3f}".format(alignment_norms))
-  print("Alignment of the baseline: {:.3f}".format(alignment_baseline))
-  print("Predicted: {:.3f} = {:.3f} - {:.3f}"\
-        .format(alignment_norms-alignment_baseline, alignment_norms,
-                alignment_baseline))
-  print("Found: {:.3f} = {:.3f} - {:.3f}"\
-        .format(sum_shapley_values, alignment_norms, alignment_baseline))
+  # print("Sum of the Shapley values: {:.3f}".format(sum_shapley_values))
+  # print("Alignment of the norms: {:.3f}".format(alignment_norms))
+  # print("Alignment of the baseline: {:.3f}".format(alignment_baseline))
+  # print("Predicted: {:.3f} = {:.3f} - {:.3f}"\
+  #       .format(alignment_norms-alignment_baseline, alignment_norms,
+  #               alignment_baseline))
+  # print("Found: {:.3f} = {:.3f} - {:.3f}"\
+  #       .format(sum_shapley_values, alignment_norms, alignment_baseline))
+  
+  tol = 0.025
+  for v in values:
+    print("*** Checking monotonicity for value {} ***".format(v))
+    monotone_results = check_monotone(v)
+    
+    for r in monotone_results:
+      if r['algn_N1'] > r['algn_N2'] + tol:
+        print("Non-monotonicity found:")
+        print("N1 = {}".format(list(r['N1'])))
+        print("algn_N1 = {:.2f}".format(r['algn_N1']))
+        print("N2 = {}".format(list(r['N1'])+[r['n']]))
+        print("algn_N2 = {:.2f}".format(r['algn_N2']))
+        print()
+    
+    print()
     
     

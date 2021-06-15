@@ -183,8 +183,7 @@ def shapley_values_efficiency(value):
                 alignment_baseline))
   print("Found: {:.3f} = {:.3f} - {:.3f}\n"\
         .format(sum_shapley_values, alignment_norms, alignment_baseline))
-
-
+  
 
 if __name__ == '__main__':
   
