@@ -136,4 +136,3 @@ class Society:
     # recompute segments
     self.assign_agents_to_segments()
     self.time_step += 1
-  
