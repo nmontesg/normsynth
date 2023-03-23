@@ -1,15 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Sep 25 16:25:07 2020
-
-@author: Nieves Montes
-
-@description: Implementation of a Genetic Optimizer to find the family of
-parameters that results in the most well-aligned model with respect to some
-values.
-"""
-
 import copy
 import portion
 import pickle

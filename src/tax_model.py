@@ -1,13 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Sep 25 15:48:58 2020
-
-@author: Nieves Montes
-
-@description: Implement the example tax model.
-"""
-
 import numpy as np
 
 def compute_gini_wealth(model):

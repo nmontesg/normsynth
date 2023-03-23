@@ -1,14 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Sep 25 16:45:32 2020
-
-@author: nmontes
-
-@description: Compute Shapley value of individual norms in an optimal
-normative system, and the cross-alignment.
-"""
-
 import math
 import copy
 import pickle

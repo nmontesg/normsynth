@@ -1,13 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Sep 25 16:03:17 2020
-
-@author: Nieves Montes
-
-@description: Compute the alignmnet given a model.
-"""
-
 import numpy as np
 import multiprocessing as mp
 

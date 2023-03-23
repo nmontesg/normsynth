@@ -1,14 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Oct  7 07:29:17 2020
-
-@author: Nieves Montes
-
-@description: Auxiliary script to inspect the optimal models and produce the
-plots.
-"""
-
 import pickle
 import json
 import numpy as np
